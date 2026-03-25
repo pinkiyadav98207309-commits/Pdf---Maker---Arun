@@ -1,0 +1,62 @@
+let images = [];
+
+const dropArea = document.getElementById("dropArea");
+const fileInput = document.getElementById("fileInput");
+const preview = document.getElementById("preview");
+
+// click गर्दा file select
+dropArea.addEventListener("click", () => fileInput.click());
+
+// drag events
+dropArea.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropArea.style.background = "#d0e7ff";
+});
+
+dropArea.addEventListener("dragleave", () => {
+    dropArea.style.background = "#fafafa";
+});
+
+dropArea.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropArea.style.background = "#fafafa";
+    handleFiles(e.dataTransfer.files);
+});
+
+// file input
+fileInput.addEventListener("change", (e) => {
+    handleFiles(e.target.files);
+});
+
+function handleFiles(files) {
+    Array.from(files).forEach(file => {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            images.push(e.target.result);
+
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            preview.appendChild(img);
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+
+// A4 PDF create
+function createPDF() {
+    const { jsPDF } = window.jspdf;
+
+    // A4 size (mm)
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    images.forEach((img, index) => {
+        if (index > 0) pdf.addPage();
+
+        // A4 size: 210 x 297 mm
+        pdf.addImage(img, 'JPEG', 10, 10, 190, 277);
+    });
+
+    pdf.save("A4_Photo.pdf");
+}
